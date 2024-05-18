@@ -1,6 +1,9 @@
 package restkit
 
-import "net/http"
+import (
+	"log/slog"
+	"net/http"
+)
 
 type ErrorMap map[error]int
 
@@ -33,6 +36,10 @@ func (ef *ErrorFilter) WriteIfError(w http.ResponseWriter, err error) bool {
 	status, ok := ef.errors[err]
 	if !ok {
 		status = http.StatusInternalServerError
+	}
+
+	if status >= 500 {
+		slog.Error("Error in request", "message", err.Error())
 	}
 
 	http.Error(w, http.StatusText(status), status)
